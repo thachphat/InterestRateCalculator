@@ -20,9 +20,13 @@ export default class Calculator extends Component {
   }
 
   calculateResult() {
-    let interestPerPeriod = this.state.interest / 12 * this.state.period
-    let result = this.state.depositValue * Math.pow(1 + interestPerPeriod / 100, this.state.depositMonths / this.state.period)
-    return isNaN(result) ? this.state.depositValue : result
+    if (this.state.depositMonths % this.state.period != 0) {
+      return 'Chu kỳ và số tháng gửi đã nhập không hợp lệ (không chia hết cho nhau)'
+    } else {
+      let interestPerPeriod = this.state.interest / 12 * this.state.period
+      let result = this.state.depositValue * Math.pow(1 + interestPerPeriod / 100, this.state.depositMonths / this.state.period)
+      return isNaN(result) ? this.state.depositValue : result
+    }
   }
 
   render() {
@@ -56,7 +60,7 @@ export default class Calculator extends Component {
           />
         </View>
         <View style={styles.container}>
-          <Text style={styles.title}>Số tháng gửi</Text>
+          <Text style={styles.title}>Số tháng gửi:</Text>
           <TextInput
             style={styles.textInput}
             keyboardType='number-pad'
