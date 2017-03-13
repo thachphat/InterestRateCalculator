@@ -4,7 +4,8 @@ import {
   StyleSheet,
   Text,
   View,
-  TextInput
+  TextInput,
+  Alert
 } from 'react-native';
 
 export default class Calculator extends Component {
@@ -15,18 +16,27 @@ export default class Calculator extends Component {
       interest: 7.5,
       period: 12,
       depositMonths: 12,
-      result: 0
+      result: 0,
+      realInterest: 0
     }
   }
 
+  componentDidMount() {
+    this.calculateResult()
+  }
+
   calculateResult() {
+    let result = this.state.result
     if (this.state.depositMonths % this.state.period != 0) {
-      return 'Chu kỳ và số tháng gửi đã nhập không hợp lệ (không chia hết cho nhau)'
+      Alert.alert('Chu kỳ và số tháng gửi đã nhập không hợp lệ (không chia hết cho nhau)')
     } else {
       let interestPerPeriod = this.state.interest / 12 * this.state.period
-      let result = this.state.depositValue * Math.pow(1 + interestPerPeriod / 100, this.state.depositMonths / this.state.period)
-      return isNaN(result) ? this.state.depositValue : result
+      result = this.state.depositValue * Math.pow(1 + interestPerPeriod / 100, this.state.depositMonths / this.state.period)
     }
+    this.setState({
+      result: result,
+      realInterest: (result - this.state.depositValue) / this.state.depositValue * 100
+    })
   }
 
   render() {
@@ -38,7 +48,9 @@ export default class Calculator extends Component {
             style={styles.textInput}
             keyboardType='decimal-pad'
             value={this.state.depositValue.toString()}
-            onChangeText={ (depositValue) => this.setState({depositValue})}
+            onChangeText={ (depositValue) => this.setState({depositValue}, function(){
+              this.calculateResult()
+            }.bind(this) )}
           />
         </View>
         <View style={styles.container}>
@@ -47,7 +59,9 @@ export default class Calculator extends Component {
             style={styles.textInput}
             keyboardType='decimal-pad'
             value={this.state.interest.toString()}
-            onChangeText={ (interest) => this.setState({interest})}
+            onChangeText={ (interest) => this.setState({interest}, function() {
+              this.calculateResult()
+            }.bind(this))}
           />
         </View>
         <View style={styles.container}>
@@ -56,7 +70,9 @@ export default class Calculator extends Component {
             style={styles.textInput}
             keyboardType='number-pad'
             value={this.state.period.toString()}
-            onChangeText={ (period) => this.setState({period})}
+            onChangeText={ (period) => this.setState({period}, function(){
+              this.calculateResult()
+            }.bind(this))}
           />
         </View>
         <View style={styles.container}>
@@ -65,11 +81,16 @@ export default class Calculator extends Component {
             style={styles.textInput}
             keyboardType='number-pad'
             value={this.state.depositMonths.toString()}
-            onChangeText={ (depositMonths) => this.setState({depositMonths})}
+            onChangeText={ (depositMonths) => this.setState({depositMonths}, function(){
+              this.calculateResult()
+            }.bind(this) )}
           />
         </View>
         <View style={styles.container}>
-          <Text style={[styles.title,{fontSize: 20}]}>Số tiền rút: {this.calculateResult()}</Text>
+          <Text style={[styles.title,{fontSize: 20}]}>Số tiền rút: {this.state.result}</Text>
+        </View>
+        <View style={[styles.container, {paddingTop: 15}]}>
+          <Text style={[styles.title,{fontSize: 20}]}>Lãi suất thực: {this.state.realInterest}%</Text>
         </View>
       </View>
     )
